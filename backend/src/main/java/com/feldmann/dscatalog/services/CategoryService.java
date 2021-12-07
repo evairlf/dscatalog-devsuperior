@@ -14,6 +14,8 @@ import com.feldmann.dscatalog.services.exceptions.ResourceNotFoundException;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,14 +29,14 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<CategoryDTO> findAll() {
-        List<Category> list = repository.findAll();
+    public Page<CategoryDTO> findAllPaged(PageRequest pageRequest) {
+        Page<Category> list = repository.findAll(pageRequest);
         // Stream() = transforma para stream para poder usar funções de alta ordem
         // map() = mapeia o objeto e para cada valor do index x ele faz algo com a arrow
         // function que no java é -> e nao =>
         // Collect() = Desfaz a transformação de stream e volta para a forma desejada no
         // caso CollectorstoList()
-        return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());
+        return list.map(x -> new CategoryDTO(x));
 
     }
 
@@ -75,4 +77,5 @@ public class CategoryService {
         }
         
     }
+
 }
