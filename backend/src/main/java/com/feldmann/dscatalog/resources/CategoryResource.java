@@ -1,11 +1,8 @@
 package com.feldmann.dscatalog.resources;
 
-
-
-import java.util.ArrayList;
 import java.util.List;
 
-import com.feldmann.dscatalog.entities.Category;
+import com.feldmann.dscatalog.dto.CategoryDTO;
 import com.feldmann.dscatalog.services.CategoryService;
 
 import org.springframework.http.ResponseEntity;
@@ -25,8 +22,8 @@ public class CategoryResource {
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> findAll(){
-        List<Category> list = categoryService.findAll();
+    public ResponseEntity<List<CategoryDTO>> findAll(){
+        List<CategoryDTO> list = categoryService.findAll();
         return ResponseEntity.ok().body(list);
     }
 
