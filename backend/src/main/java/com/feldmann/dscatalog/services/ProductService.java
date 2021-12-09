@@ -1,14 +1,13 @@
 package com.feldmann.dscatalog.services;
 
-
 import java.util.Optional;
 
 
 import javax.persistence.EntityNotFoundException;
 
-import com.feldmann.dscatalog.dto.CategoryDTO;
-import com.feldmann.dscatalog.entities.Category;
-import com.feldmann.dscatalog.repositories.CategoryRepository;
+import com.feldmann.dscatalog.dto.ProductDTO;
+import com.feldmann.dscatalog.entities.Product;
+import com.feldmann.dscatalog.repositories.ProductRepository;
 import com.feldmann.dscatalog.services.exceptions.DatabaseException;
 import com.feldmann.dscatalog.services.exceptions.ResourceNotFoundException;
 
@@ -20,48 +19,48 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CategoryService {
+public class ProductService {
 
-    private CategoryRepository repository;
+    private ProductRepository repository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
-        this.repository = categoryRepository;
+    public ProductService(ProductRepository ProductRepository) {
+        this.repository = ProductRepository;
     }
 
     @Transactional(readOnly = true)
-    public Page<CategoryDTO> findAllPaged(PageRequest pageRequest) {
-        Page<Category> list = repository.findAll(pageRequest);
+    public Page<ProductDTO> findAllPaged(PageRequest pageRequest) {
+        Page<Product> list = repository.findAll(pageRequest);
         // Stream() = transforma para stream para poder usar funções de alta ordem
         // map() = mapeia o objeto e para cada valor do index x ele faz algo com a arrow
         // function que no java é -> e nao =>
         // Collect() = Desfaz a transformação de stream e volta para a forma desejada no
         // caso CollectorstoList()
-        return list.map(x -> new CategoryDTO(x));
+        return list.map(x -> new ProductDTO(x));
 
     }
 
     @Transactional(readOnly = true)
-    public CategoryDTO findById(Long id) {
-        Optional<Category> obj = repository.findById(id);
-        Category entity = obj.orElseThrow(() -> new ResourceNotFoundException("Entity not Found"));
-        return new CategoryDTO(entity);
+    public ProductDTO findById(Long id) {
+        Optional<Product> obj = repository.findById(id);
+        Product entity = obj.orElseThrow(() -> new ResourceNotFoundException("Entity not Found"));
+        return new ProductDTO(entity, entity.getCategories());
     }
 
     @Transactional
-    public CategoryDTO insert(CategoryDTO dto) {
-        Category entity = new Category();
-        entity.setName(dto.getName());
+    public ProductDTO insert(ProductDTO dto) {
+        Product entity = new Product();
+       // entity.setName(dto.getName());
         entity = repository.save(entity);
-        return new CategoryDTO(entity);
+        return new ProductDTO(entity);
     }
 
     @Transactional
-    public CategoryDTO update(Long id, CategoryDTO dto) {
+    public ProductDTO update(Long id, ProductDTO dto) {
         try {
-            Category entity = repository.getById(id);
-            entity.setName(dto.getName());
+            Product entity = repository.getById(id);
+           // entity.setName(dto.getName());
             entity = repository.save(entity);
-            return new CategoryDTO(entity);
+            return new ProductDTO(entity);
         } catch (EntityNotFoundException e) {
             throw new ResourceNotFoundException("id Not Found"+id);
         }
