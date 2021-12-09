@@ -5,8 +5,11 @@ import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
 
+import com.feldmann.dscatalog.dto.CategoryDTO;
 import com.feldmann.dscatalog.dto.ProductDTO;
+import com.feldmann.dscatalog.entities.Category;
 import com.feldmann.dscatalog.entities.Product;
+import com.feldmann.dscatalog.repositories.CategoryRepository;
 import com.feldmann.dscatalog.repositories.ProductRepository;
 import com.feldmann.dscatalog.services.exceptions.DatabaseException;
 import com.feldmann.dscatalog.services.exceptions.ResourceNotFoundException;
@@ -22,9 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
     private ProductRepository repository;
+    private CategoryRepository categoryRepository;
 
-    public ProductService(ProductRepository ProductRepository) {
-        this.repository = ProductRepository;
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
+        this.repository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Transactional(readOnly = true)
@@ -49,7 +54,7 @@ public class ProductService {
     @Transactional
     public ProductDTO insert(ProductDTO dto) {
         Product entity = new Product();
-       // entity.setName(dto.getName());
+        copyDtoToEntity(dto, entity);
         entity = repository.save(entity);
         return new ProductDTO(entity);
     }
@@ -58,7 +63,7 @@ public class ProductService {
     public ProductDTO update(Long id, ProductDTO dto) {
         try {
             Product entity = repository.getById(id);
-           // entity.setName(dto.getName());
+            copyDtoToEntity(dto, entity);
             entity = repository.save(entity);
             return new ProductDTO(entity);
         } catch (EntityNotFoundException e) {
@@ -75,6 +80,21 @@ public class ProductService {
             throw new DatabaseException("Integrity Violation");
         }
         
+    }
+
+    private void copyDtoToEntity(ProductDTO dto, Product entity) {
+        entity.setName(dto.getName());
+        entity.setDescription(dto.getDescription());
+        entity.setDate((dto.getDate()));
+        entity.setPrice(dto.getPrice());
+        entity.setImgUrl(dto.getImgUrl());
+
+        entity.getCategories().clear();
+
+        for(CategoryDTO catDto : dto.getCategories()){
+            Category category = categoryRepository.getById(catDto.getId());
+            entity.getCategories().add(category);
+        }
     }
 
 }
